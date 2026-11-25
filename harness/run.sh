@@ -232,8 +232,14 @@ case "$cmd" in
         echo "running" > "$HS/ct_${local_id}.status"
         exit 0 ;;
     start)
-        [[ -f "$HS/ct_${id}.status" ]] || { echo "mock: CT $id unbekannt" >&2; exit 2; }
         if [[ -f "$HS/start_fail" ]]; then echo "mock: Start fehlgeschlagen" >&2; exit 255; fi
+        if [[ -f "$HS/create_start_fail" ]]; then
+            # Live-Grube 31a: create meldet Exit 0, Start schlug fehl → CT bleibt stopped
+            echo "stopped" > "$HS/ct_${id}.status"
+            /bin/sed -i "s|^$id .*|$id stopped $(cat "$HS/ct_${id}.hostname" 2>/dev/null || echo ct-$id)|" "$HS/ct_list"
+            exit 0
+        fi
+        [[ -f "$HS/ct_${id}.status" ]] || { echo "mock: CT $id unbekannt" >&2; exit 2; }
         echo "running" > "$HS/ct_${id}.status"
         /bin/sed -i "s|^$id .*|$id running $(cat "$HS/ct_${id}.hostname" 2>/dev/null || echo ct-$id)|" "$HS/ct_list"
         exit 0 ;;

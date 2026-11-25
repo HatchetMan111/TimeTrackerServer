@@ -396,17 +396,15 @@ do_install() {
     --rootfs "${CT_STORAGE}:${CT_DISK}" --net0 "name=eth0,bridge=${CT_BRIDGE},ip=dhcp" \
     --unprivileged "$CT_UNPRIVILEGED" --features nesting=1 --onboot "$CT_ONBOOT" \
     --ostype debian --start 0
-  # Grube 31a: create kann Exit 0 trotz fehlgeschlagenem Spawn liefern → Status-Poll
-  sleep 3
+  # Start (idempotent; pct create --start 0 → jetzt starten)
+  pct start "$CTID" || die "pct start fehlgeschlagen (siehe pct config $CTID)."
+  # Grube 31a: create/start kann Exit 0 trotz fehlgeschlagenem Spawn liefern → Status-Poll
   if ! verify_ct_started "$CTID"; then
-    err "pct create meldete Erfolg, aber der Container läuft nicht (häufig: Template-Arch ≠ Host-Arch)."
+    err "pct start meldete Erfolg, aber der Container läuft nicht (häufig: Template-Arch ≠ Host-Arch)."
     echo "    pct destroy $CTID --purge && bash -c \"\$(wget -qLO - $ONE_LINER)\"" >&2
     exit 1
   fi
   pct set "$CTID" --onboot "$CT_ONBOOT" >/dev/null 2>&1 || true
-  # Start (idempotent; pct create --start 0 → jetzt starten)
-  pct start "$CTID" || die "pct start fehlgeschlagen (siehe pct config $CTID)."
-  verify_ct_started "$CTID"
   ok "Container läuft."
 
   local ip; ip="$(wait_ct_network "$CTID")" || die "CT bekam keine IP (DHCP? Bridge $CT_BRIDGE?)."

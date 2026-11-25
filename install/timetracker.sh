@@ -395,7 +395,7 @@ do_install() {
     --hostname "$CT_HOSTNAME" --cores "$CT_CORES" --memory "$CT_RAM" \
     --rootfs "${CT_STORAGE}:${CT_DISK}" --net0 "name=eth0,bridge=${CT_BRIDGE},ip=dhcp" \
     --unprivileged "$CT_UNPRIVILEGED" --features nesting=1 --onboot "$CT_ONBOOT" \
-    --ostype l26 --start 0
+    --ostype debian --start 0
   # Grube 31a: create kann Exit 0 trotz fehlgeschlagenem Spawn liefern → Status-Poll
   sleep 3
   if ! verify_ct_started "$CTID"; then

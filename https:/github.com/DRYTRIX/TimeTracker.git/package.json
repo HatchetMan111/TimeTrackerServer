@@ -1,0 +1,1 @@
+{"name":"timetracker-frontend","scripts":{"build:docker":"node build.js"}}

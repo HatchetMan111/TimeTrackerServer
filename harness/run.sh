@@ -108,7 +108,7 @@ ln -sf "$MK/mock-aptget"    "$INNERBIN/apt-get"
 ln -sf "$MK/mock-systemctl" "$INNERBIN/systemctl"
 ln -sf "$MK/mock-getent"    "$INNERBIN/getent"
 ln -sf "$MK/mock-hostname"  "$INNERBIN/hostname"
-ln -sf "$MK/mock-sudo"      "$INNERBIN/sudo"
+ln -sf "$MK/mock-su"        "$INNERBIN/su"
 ln -sf "$MK/mock-lsb"       "$INNERBIN/lsb_release"
 ln -sf "$MK/mock-useradd"   "$INNERBIN/useradd"
 ln -sf "$MK/mock-chown"     "$INNERBIN/chown"
@@ -565,20 +565,20 @@ if [[ "${1:-}" == "-I" ]]; then printf '%s 2601:db8::1 \n' "$IP"; exit 0; fi
 echo "timetracker"; exit 0
 EOF
 
-cat > "$MK/mock-sudo" <<'EOF'
+cat > "$MK/mock-su" <<'EOF'
 #!/usr/bin/env bash
-# sudo-Mock (inner): führt das erste Nicht-Flag-Argument aus (psql/createdb)
+# su-Mock (inner): su - postgres -c "<cmd>" → cmd ausführen (psql/createdb)
 set -u
 HS="${HARNESS_STATE:?}"
-echo "sudo $*" >> "$HS/calls.log"
-shift # -u postgres
-cmd="${1:-}"
+echo "su $*" >> "$HS/calls.log"
+# su - postgres -c '…' → letztes Argument ist das Kommando
+cmd="${*: -1}"
 case "$cmd" in
-    psql)
-        # SELECT 1 … → "1" ausgeben (Rolle/DB existiert noch nicht → 0 Zeilen)
+    psql*|*psql*)
+        # SELECT 1 … → "0" (Rolle/DB existiert noch nicht)
         echo "0"
         exit 0 ;;
-    createdb) exit 0 ;;
+    createdb*) exit 0 ;;
 esac
 exit 0
 EOF

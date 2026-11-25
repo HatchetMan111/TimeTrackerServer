@@ -277,11 +277,12 @@ if ! command -v pg_isready >/dev/null 2>&1; then
 fi
 systemctl enable postgresql >/dev/null 2>&1 || true
 systemctl start postgresql || true
-# DB + Rolle anlegen (idempotent)
-sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" | grep -q 1 \
-  || sudo -u postgres psql -c "CREATE ROLE ${DB_USER} LOGIN PASSWORD '${DB_PASS}'" >/dev/null
-sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1 \
-  || sudo -u postgres createdb -O "${DB_USER}" "${DB_NAME}"
+# DB + Rolle anlegen (idempotent). Läuft als root im CT → kein sudo nötig
+# (nacktes Debian-Template hat kein sudo; su - postgres ist der root-Weg).
+su - postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'\"" | grep -q 1 \
+  || su - postgres -c "psql -c \"CREATE ROLE ${DB_USER} LOGIN PASSWORD '${DB_PASS}'\"" >/dev/null
+su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'\"" | grep -q 1 \
+  || su - postgres -c "createdb -O ${DB_USER} ${DB_NAME}"
 log "PostgreSQL bereit (DB ${DB_NAME})."
 
 log "=== App-Code klonen (${APP_REPO}) ==="

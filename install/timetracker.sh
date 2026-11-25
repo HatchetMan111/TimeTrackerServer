@@ -2,14 +2,14 @@
 # =============================================================================
 # TimeTracker Proxmox LXC Installer (Community-Scripts-Stil)
 #
-# Repo:        https://github.com/HatchetMan111/TimeTracker-Proxmox
+# Repo:        https://github.com/HatchetMan111/TimeTrackerServer
 # Upstream:    https://github.com/DRYTRIX/TimeTracker  (GPL-3.0, v5.22.0)
 # App:         Self-hosted Zeiterfassung + Rechnungen + Peppol e-Invoicing
 # Stack:       Python 3.11 / Flask, PostgreSQL 16 (nativen im CT), Gunicorn+eventlet
 # Web-UI:      http://<CT-IP>:8080
 #
 # Einzeiler:
-#   bash -c "$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTracker-Proxmox/main/install/timetracker.sh)"
+#   bash -c "$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTrackerServer/main/install/timetracker.sh)"
 #
 # Modi:
 #   (keine)        Neu-Installation (nächste freie CT-ID)
@@ -51,7 +51,7 @@ CT_ONBOOT=1
 ASSUME_YES=0
 MODE="install"
 # Roh-URL des Installers (für Reinstall-Hinweise in der Fehlerkette)
-ONE_LINER="https://raw.githubusercontent.com/HatchetMan111/TimeTracker-Proxmox/main/install/timetracker.sh"
+ONE_LINER="https://raw.githubusercontent.com/HatchetMan111/TimeTrackerServer/main/install/timetracker.sh"
 
 # Farben / Helper
 RED=$'\033[0;31m'; GREEN=$'\033[0;32m'; YELLOW=$'\033[1;33m'
@@ -499,7 +499,7 @@ summary() {
   echo -e "  🌐 URL       : ${BLUE}http://${ip}:${APP_PORT}${NC}"
   echo -e "  🔑 Erster Login wird Admin (Benutzer: admin)."
   echo -e "  📜 Logs      : pct exec ${CTID} -- journalctl -u ${APP_NAME} -n 50 --no-pager"
-  echo -e "  ♻️  Update    : bash -c \"\$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTracker-Proxmox/main/install/timetracker.sh)\" -- --update"
+  echo -e "  ♻️  Update    : bash -c \"\$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTrackerServer/main/install/timetracker.sh)\" -- --update"
   echo -e "  🗑️  Deinstall: ... -- --uninstall"
   echo -e "  🔄 Reboot-Test: pct reboot ${CTID}  (danach ist die App via systemd wieder da)"
   echo ""

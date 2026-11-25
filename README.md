@@ -22,7 +22,7 @@ Ein-Klick-Installation von [TimeTracker](https://github.com/DRYTRIX/TimeTracker)
 Auf dem Proxmox-Host als root:
 
 ```bash
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTracker-Proxmox/main/install/timetracker.sh)"
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTrackerServer/main/install/timetracker.sh)"
 ```
 
 Das Script:
@@ -80,7 +80,7 @@ Beim ersten Aufruf der Weboberfläche den Admin-Account anlegen
 ## Update
 
 ```bash
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTracker-Proxmox/main/install/timetracker.sh)" -- --update
+bash -c "$(wget -qLO - https://raw.githubusercontent.com/HatchetMan111/TimeTrackerServer/main/install/timetracker.sh)" -- --update
 ```
 
 Aktualisiert App-Code + Assets im bestehenden Container (findet ihn per Hostname

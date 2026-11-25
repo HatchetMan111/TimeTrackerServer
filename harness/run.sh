@@ -261,6 +261,7 @@ case "$cmd" in
         /bin/sed -e "s|/tmp/|$MK/tmp/|g" -e "s|/etc/|$MK/etc/|g" \
             -e "s|/usr/share|$MK/usr/share|g" -e "s|/usr/local|$MK/usr/local|g" \
             -e "s|/opt/timetracker|$MK/opt/timetracker|g" \
+            -e "s|/data|$MK/data|g" -e "s|/app|$MK/app|g" \
             "$src" > "$MK$dst"
         chmod 755 "$MK$dst" 2>/dev/null || true
         echo "pct push $id $src $dst" >> "$HS/calls.log"
@@ -613,9 +614,9 @@ chmod +x "$MK"/mock-* "$MK"/bin-host/* "$MK"/bin-inner/* 2>/dev/null
 # ── Runner ─────────────────────────────────────────────────────────────────
 reset_state() {
     rm -rf "$HS" "${MK:?}/opt" "${MK:?}/etc" "${MK:?}/root" "${MK:?}/var/log" "${MK:?}/tmp" \
-        "${MK:?}/usr" "${MK:?}/data"
+        "${MK:?}/usr" "${MK:?}/data" "${MK:?}/app"
     mkdir -p "$HS" "$HS/templates" "$MK/etc/systemd/system" "$MK/etc/apt/sources.list.d" \
-        "$MK/opt" "$MK/root" "$MK/var/log" "$MK/tmp" "$MK/usr/share" "$MK/usr/local" "$MK/data"
+        "$MK/opt" "$MK/root" "$MK/var/log" "$MK/tmp" "$MK/usr/share" "$MK/usr/local" "$MK/data" "$MK/app"
     echo "$CT_IP" > "$HS/ct_ip"
     echo "150" > "$HS/nextid"
     : > "$HS/ct_list"

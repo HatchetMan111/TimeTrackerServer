@@ -310,9 +310,14 @@ log "Assets gebaut: dist=$(ls app/static/dist 2>/dev/null | wc -l) vendor=$(ls a
 
 log "=== Benutzer + Verzeichnisse ==="
 id "$APP_USER" >/dev/null 2>&1 || useradd -m -s /bin/bash "$APP_USER"
-mkdir -p /data /data/uploads /app/logs 2>/dev/null || true
-mkdir -p "$APP_DIR/logs" "$APP_DIR/instance" "$APP_DIR/app/static/uploads/logos"
+mkdir -p /data /data/uploads "$APP_DIR/logs" "$APP_DIR/instance" "$APP_DIR/app/static/uploads/logos"
+# start-fixed.py ist für Docker hardcoded: os.chdir("/app") + execv("/usr/local/bin/gunicorn").
+# Im LXC fehlen beide → Symlinks legen, damit der offizielle Entrypoint läuft.
+ln -sfn "$APP_DIR" /app 2>/dev/null || true
+mkdir -p /usr/local/bin
+ln -sf "$APP_DIR/venv/bin/gunicorn" /usr/local/bin/gunicorn 2>/dev/null || true
 # /app/logs wird von der App als LOG_FILE genutzt → Symlink auf persistente Daten
+mkdir -p /app/logs 2>/dev/null || true
 ln -sfn /data "$APP_DIR/../data" 2>/dev/null || true
 chown -R "$APP_USER:$APP_USER" "$APP_DIR" /data 2>/dev/null || true
 
@@ -373,7 +378,16 @@ systemctl restart "${APP_NAME}"
 for i in $(seq 1 45); do
   code="$(curl -s -o /dev/null -w '%{http_code}' -L "http://127.0.0.1:${PORT}/_health" || true)"
   if [ "$code" = "200" ]; then log "Upstream /_health = 200"; break; fi
-  [ "$i" = "45" ] && { err "App wurde nicht healthy (letzter Code: ${code:-000})"; journalctl -u "${APP_NAME}" -n 60 --no-pager >&2 || true; exit 1; }
+  if [ "$i" = "45" ]; then
+    err "App wurde nicht healthy (letzter Code: ${code:-000})"
+    echo "--- journalctl (letzte 40) ---" >&2
+    journalctl -u "${APP_NAME}" -n 40 --no-pager >&2 || true
+    echo "--- /data/timetracker.log (letzte 60) ---" >&2
+    tail -n 60 /data/timetracker.log >&2 2>/dev/null || echo "(kein App-Log)" >&2
+    echo "--- manueller Start-Versuch (Fehler direkt sichtbar) ---" >&2
+    su - "${APP_USER}" -c "cd ${APP_DIR} && set -a && . ${APP_DIR}/.env && set +a && ${APP_DIR}/venv/bin/python ${APP_DIR}/docker/start-fixed.py" >&2 2>&1 | tail -n 30 || true
+    exit 1
+  fi
   sleep 2
 done
 log "=== Setup abgeschlossen (Port ${PORT}) ==="

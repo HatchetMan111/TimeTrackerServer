@@ -1,0 +1,21 @@
+# TimeTracker systemd-Unit (Referenz; der Installer schreibt sie identisch
+# in den Container nach /etc/systemd/system/timetracker.service).
+[Unit]
+Description=TimeTracker (Flask + Gunicorn)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=timetracker
+Group=timetracker
+WorkingDirectory=/opt/timetracker
+EnvironmentFile=/opt/timetracker/.env
+ExecStart=/opt/timetracker/venv/bin/python /opt/timetracker/docker/start-fixed.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/data/timetracker.log
+StandardError=append:/data/timetracker.log
+
+[Install]
+WantedBy=multi-user.target

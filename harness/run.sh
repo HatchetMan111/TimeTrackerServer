@@ -581,6 +581,11 @@ case "$cmd" in
         exit 0 ;;
     createdb*) exit 0 ;;
 esac
+# SHOW server_encoding / pg_encoding_to_char → UTF8 melden
+case "$cmd" in
+    *server_encoding*) echo "UTF8"; exit 0 ;;
+    *pg_encoding_to_char*) echo "UTF8"; exit 0 ;;
+esac
 exit 0
 EOF
 

@@ -285,7 +285,10 @@ systemctl start postgresql || true
 su - postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'\"" | grep -q 1 \
   || su - postgres -c "psql -c \"CREATE ROLE ${DB_USER} LOGIN PASSWORD '${DB_PASS}'\"" >/dev/null
 su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'\"" | grep -q 1 \
-  || su - postgres -c "createdb -O ${DB_USER} ${DB_NAME}"
+  || su - postgres -c "createdb -E UTF8 -T template0 -O ${DB_USER} ${DB_NAME}"
+# Encoding sichtbar machen: war der Cluster unter C-Locale initialisiert, ist
+# template1 SQL_ASCII und psycopg2 codet Queries nach ASCII → UnicodeEncodeError.
+log "Encoding: server=$(su - postgres -c "psql -tAc 'SHOW server_encoding'" 2>/dev/null) db=$(su - postgres -c "psql -tAc \"SELECT pg_encoding_to_char(encoding) FROM pg_database WHERE datname='${DB_NAME}'\"" 2>/dev/null)"
 log "PostgreSQL bereit (DB ${DB_NAME})."
 
 log "=== App-Code klonen (${APP_REPO}) ==="

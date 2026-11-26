@@ -238,6 +238,9 @@ SECRET_KEY="$(openssl rand -hex 32)"
 
 log "=== Basis-Pakete ==="
 export DEBIAN_FRONTEND=noninteractive
+# Migration 037 seedet Umlaute (expense_categories) → Python/psycopg2 müssen
+# UTF-8 als Locale sehen, sonst UnicodeEncodeError (ascii codec).
+export LANG=C.UTF-8 LC_ALL=C.UTF-8
 apt-get update -qq
 apt-get install -y -qq --no-install-recommends \
   curl wget ca-certificates gnupg lsb-release openssl \
@@ -335,6 +338,9 @@ POSTGRES_PASSWORD=${DB_PASS}
 LOG_FILE=/data/timetracker.log
 # start.py liegt in docker/ → App-Root muss im Python-Path liegen
 PYTHONPATH=${APP_DIR}
+# UTF-8-Locale: Migration 037 seedet Umlaute → sonst UnicodeEncodeError (ascii)
+LANG=C.UTF-8
+LC_ALL=C.UTF-8
 TZ=${TZ:-Europe/Berlin}
 CURRENCY=${CURRENCY:-EUR}
 ALLOW_SELF_REGISTER=true
@@ -365,6 +371,9 @@ EnvironmentFile=${APP_DIR}/.env
 # start.py liegt in docker/ → sys.path[0] ist docker/, nicht das App-Root.
 # PYTHONPATH sorgt dafür, dass "from app import create_app" gefunden wird.
 Environment=PYTHONPATH=${APP_DIR}
+# UTF-8 für Migrationen/Seeds mit Umlauten
+Environment=LANG=C.UTF-8
+Environment=LC_ALL=C.UTF-8
 ExecStart=${APP_DIR}/venv/bin/python ${APP_DIR}/docker/start-fixed.py
 Restart=always
 RestartSec=5

@@ -333,6 +333,8 @@ POSTGRES_DB=${DB_NAME}
 POSTGRES_USER=${DB_USER}
 POSTGRES_PASSWORD=${DB_PASS}
 LOG_FILE=/data/timetracker.log
+# start.py liegt in docker/ → App-Root muss im Python-Path liegen
+PYTHONPATH=${APP_DIR}
 TZ=${TZ:-Europe/Berlin}
 CURRENCY=${CURRENCY:-EUR}
 ALLOW_SELF_REGISTER=true
@@ -360,6 +362,9 @@ User=${APP_USER}
 Group=${APP_USER}
 WorkingDirectory=${APP_DIR}
 EnvironmentFile=${APP_DIR}/.env
+# start.py liegt in docker/ → sys.path[0] ist docker/, nicht das App-Root.
+# PYTHONPATH sorgt dafür, dass "from app import create_app" gefunden wird.
+Environment=PYTHONPATH=${APP_DIR}
 ExecStart=${APP_DIR}/venv/bin/python ${APP_DIR}/docker/start-fixed.py
 Restart=always
 RestartSec=5
